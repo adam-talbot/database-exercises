@@ -100,4 +100,4 @@ SELECT
 FROM albums
 WHERE genre like '%rock%';
 -- 23 results
--- this is a way to get any genres that
+-- this is a way to get any genres that contain this word
