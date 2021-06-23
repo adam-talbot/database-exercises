@@ -94,3 +94,10 @@ WHERE genre = 'Rock';
 -- 5 results
 -- these query results do not include albums with a genre of "Hard rock" or "Progressive rock" since we are only looking for "Rock" only, not if genre includes "rock"
 
+-- All the albums with a genre that contains "rock"
+SELECT 
+	name
+FROM albums
+WHERE genre like '%rock%';
+-- 23 results
+-- this is a way to get any genres that
