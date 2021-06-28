@@ -29,5 +29,12 @@ FROM salaries
 WHERE to_date > curdate();
 
 #6. Use your knowledge of built in SQL functions to generate a username for all of the employees. A username should be all lowercase, and consist of the first character of the employees first name, the first 4 characters of the employees last name, an underscore, the month the employee was born, and the last two digits of the year that they were born
-SELECT CONCAT(LOWER(SUBSTR(first_name, 1, 1)), LOWER(SUBSTR(last_name, 1, 4)), '_0', MONTH(birth_date), SUBSTR(YEAR(birth_date), 3, 2)) as username, first_name, last_name, birth_date
+SELECT CONCAT(
+		LOWER(SUBSTR(first_name, 1, 1)), # lower-case first letter of first name 
+		LOWER(SUBSTR(last_name, 1, 4)), # lower-case first four letters of last name
+		 '_', # add underscore
+		  SUBSTR(birth_date, 6, 2), # month born
+		   SUBSTR(YEAR(birth_date), 3, 2) # last 2 digits of year born
+		     ) as username, #create alias
+		   first_name, last_name, birth_date
 FROM employees;
