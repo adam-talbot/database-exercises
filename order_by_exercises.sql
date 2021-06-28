@@ -51,7 +51,7 @@ SELECT *
 FROM employees
 WHERE last_name LIKE 'E%'
 	AND last_name LIKE '%E'
-	ORDER BY hire_date DESC;
+ORDER BY hire_date DESC;
 -- 899 records returned
 -- newest - Teiji Eldridge
 -- oldest - Sergi Erde
@@ -61,12 +61,21 @@ SELECT *
 FROM employees
 WHERE hire_date BETWEEN '1990-01-01' AND '1999-12-31'
 	AND birth_date LIKE '%-12-25'
-	ORDER BY birth_date, hire_date DESC;
+ORDER BY birth_date, hire_date DESC;
 -- 362 records returned
 -- oldest, hired last - Khun Bernini
 -- youngest, hired first - Douadi Pettis
 
-
+-- 7 v 2. Find all employees hired in the 90s and born on Christmas. Sort the results so that the oldest employee who was hired last is the first result. Enter a comment with the number of employees returned, the name of the oldest employee who was hired last, and the name of the youngest emmployee who was hired first.
+SELECT *
+FROM employees
+WHERE hire_date LIKE '199%'
+	AND birth_date LIKE '%-12-25'
+ORDER BY birth_date, hire_date DESC;
+-- 362 records returned
+-- oldest, hired last - Khun Bernini
+-- youngest, hired first - Douadi Pettis
+-- Much easier to use % on date got get back those hired in 90s
 
 
 
