@@ -4,12 +4,12 @@ USE employees;
 #2. Write a query to to find all employees whose last name starts and ends with 'E'. Use concat() to combine their first and last name together as a single column named full_name.
 SELECT CONCAT(first_name, ' ', last_name) as full_name
 FROM employees
-WHERE last_name LIKE 'E%E';
+WHERE last_name LIKE 'E%e';
 
 #3. Convert the names produced in your last query to all uppercase.
 SELECT UPPER(CONCAT(first_name, ' ', last_name)) as full_name
 FROM employees
-WHERE last_name LIKE 'E%E';
+WHERE last_name LIKE 'E%e';
 
 #4. Find all employees hired in the 90s and born on Christmas. Use datediff() function to find how many days they have been working at the company (Hint: You will also need to use NOW() or CURDATE()),
 SELECT (DATEDIFF(curdate(), hire_date)) as number_of_days_employed
@@ -17,8 +17,9 @@ FROM employees
 WHERE hire_date LIKE '199%'
 	AND birth_date LIKE '%-12-25';
 
-
-select emp_no, datediff(curdate(), hire_date) as number_of_days_employed from employees
+#4v2. Find all employees hired in the 90s and born on Christmas. Use datediff() function to find how many days they have been working at the company (Hint: You will also need to use NOW() or CURDATE()). Add additional columns
+SELECT CONCAT(first_name, ' ', last_name) as full_name, birth_date, hire_date, (DATEDIFF(curdate(), hire_date)) as number_of_days_employed
+FROM employees
 WHERE hire_date LIKE '199%'
 	AND birth_date LIKE '%-12-25';
 	
