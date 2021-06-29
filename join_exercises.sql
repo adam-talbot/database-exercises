@@ -88,5 +88,34 @@ WHERE t.to_date > curdate() #make sure this is their current title
 GROUP BY t.title #group by needed since we are using count aggregate function
 ORDER BY t.title; #order results to match order shown in exercises
 
+#5. Find the current salary of all current managers.
+-- Tables needed: departments to get dept_name, employees to get first_name and last_name, dept_emp to connect the two previous, salaries to get salaries, dept_manager to get who the managers are
+SELECT dept_name as 'Department Name', CONCAT(first_name, ' ', last_name) as "Name", salary as "Salary"
+FROM departments as d
+JOIN dept_emp as de
+USING (dept_no)
+JOIN employees as e
+USING (emp_no)
+JOIN dept_manager as dm
+USING (emp_no)
+JOIN salaries as s
+USING (emp_no)
+WHERE de.to_date > curdate()
+	AND dm.to_date > curdate()
+	AND s.to_date > curdate()
+ORDER BY dept_name;
+
+#6. Find the number of current employees in each department.
+-- Tables needed: department to get dept_name, dept_emp to get number of employees
+SELECT dept_no, dept_name, COUNT(*) as num_employees
+FROM departments as d
+JOIN dept_emp as de
+USING(dept_no)
+WHERE to_date > curdate()
+GROUP BY dept_no
+ORDER by dept_no
+
+
+
 
 
