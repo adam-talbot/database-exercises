@@ -34,7 +34,7 @@ RIGHT JOIN roles
 ON roles.id = users.role_id;
 -- 5 records returned since there were 2 reviewers
 
-#3. Use count and the appropriate join type to get a list of roles along with the number of users that has the role. Hint: You will also need to use group by in the query.
+#3. Use count and the appropriate join type to get a list of roles along with the number of users that has the role. Hint: You will also need to use group by in the query. - LOOK AT THIS AGAIN
 SELECT roles.name, COUNT(*) as number_of_users
 FROM roles
 RIGHT JOIN users
@@ -113,9 +113,116 @@ JOIN dept_emp as de
 USING(dept_no)
 WHERE to_date > curdate()
 GROUP BY dept_no
-ORDER by dept_no
+ORDER by dept_no;
 
+#7. Which department has the highest average salary? Hint: Use current not historic information.
+-- Tables needed: departments to get dept_name, dept_emp to get all employees in department, salaries to get salaries of all employees in department
+-- Will use average aggregate function and group by dept_name
+SELECT dept_name, AVG(salary) as average_salary
+FROM departments as d
+JOIN dept_emp as de
+USING (dept_no)
+JOIN salaries as s
+USING(emp_no)
+WHERE de.to_date > curdate()
+	AND s.to_date > curdate()
+GROUP BY dept_name
+ORDER BY average_salary DESC
+LIMIT 1;
 
+#8. Who is the highest paid employee in the Marketing department?
+-- Tables needed: employees to get first and last name, salaries to get salaries, dept_emp to tie employee to department no, departments to get department name, 
+SELECT first_name, last_name
+FROM employees as e
+JOIN salaries as s
+USING (emp_no)
+JOIN dept_emp as de
+USING (emp_no)
+JOIN departments as d
+USING (dept_no)
+WHERE dept_name = 'Marketing'
+	AND s.to_date > curdate()
+	AND de.to_date > curdate()
+GROUP BY first_name, last_name
+ORDER BY MAX(salary) DESC
+LIMIT 1;
 
+#8v2. Who is the highest paid employee in the Marketing department?
+SELECT first_name, last_name
+FROM employees as e
+JOIN salaries as s
+USING (emp_no)
+JOIN dept_emp as de
+USING (emp_no)
+JOIN departments as d
+USING (dept_no)
+WHERE dept_name = 'Marketing'
+	AND s.to_date > curdate()
+	AND de.to_date > curdate()
+ORDER BY salary DESC
+LIMIT 1;
 
+#9. Which current department manager has the highest salary?
+-- Tables needed: salaries to get salary, dept_manager to get managers using emp_no, employees to get first and last name, departments to get dept_name
+SELECT first_name, last_name, salary, dept_name
+FROM salaries as s
+JOIN dept_manager as dm
+USING(emp_no)
+JOIN employees as e
+USING(emp_no)
+JOIN departments as d
+USING(dept_no)
+WHERE s.to_date > curdate()
+	AND dm.to_date > curdate()
+ORDER BY salary DESC
+LIMIT 1;
 
+#10. Bonus Find the names of all current employees, their department name, and their current manager's name.
+-- Got this from a classmate, still need to figure out exactly what is going on here
+-- Key to this problem is a self join, you can do this by realiasing it
+SELECT CONCAT(e.first_name, ' ', e.last_name) AS "Employee Name", 
+d.dept_name as "Department Name",
+CONCAT(e1.first_name, ' ', e1.last_name) as 'Manager Name'
+FROM employees as e
+JOIN dept_emp as de
+  	ON de.emp_no = e.emp_no
+JOIN departments as d
+  	ON d.dept_no = de.dept_no
+JOIN dept_manager as dm
+  	ON dm.dept_no = de.dept_no
+JOIN employees as e1
+	ON e1.emp_no = dm.emp_no
+WHERE de.to_date = '9999-01-01' AND dm.to_date = '9999-01-01' AND dm.dept_no = d.dept_no
+LIMIT 10
+
+#11. Bonus Who is the highest paid employee within each department.
+-- Ryan's quick solution
+# Bonus Who is the highest paid employee within each department.
+# Do you need the answer in 20 minutes?
+# Do we need this query to run next year?
+# Do you need one code query that we could run any time in the next 20 years?
+# If there are only 9 departments, do we need a super squeeky clean solution?
+# Quick answer: run 9 queries and stitch the answers together
+(select dept_no, salary, emp_no, first_name, last_name
+from salaries
+join dept_emp using(emp_no)
+join employees using(emp_no)
+where dept_no = 'd001'
+order by salary DESC
+limit 1)
+union
+(select dept_no, salary, emp_no, first_name, last_name
+from salaries
+join dept_emp using(emp_no)
+join employees using(emp_no)
+where dept_no = 'd002'
+order by salary DESC
+limit 1);
+
+select dept_no, salary, emp_no, first_name, last_name
+from salaries
+join dept_emp using(emp_no)
+join employees using(emp_no)
+where dept_no = 'd001'
+order by salary DESC
+limit 1;
