@@ -193,7 +193,7 @@ JOIN dept_manager as dm
 JOIN employees as e1
 	ON e1.emp_no = dm.emp_no
 WHERE de.to_date = '9999-01-01' AND dm.to_date = '9999-01-01' AND dm.dept_no = d.dept_no
-LIMIT 10
+LIMIT 10;
 
 #11. Bonus Who is the highest paid employee within each department.
 -- Ryan's quick solution
