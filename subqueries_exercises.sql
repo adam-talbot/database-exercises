@@ -64,3 +64,31 @@ and emp_no IN (
 -- names: Isamu Legleitner, Karsten Sigstam, Leon DasSarma, Hilary Kambil
 
 
+
+#5. Find all the employees who currently have a higher salary than the companies overall, historical average salary
+-- start with all current salaries - 240,124
+select *
+from salaries
+where to_date > curdate();
+-- what is average historical salary?
+select avg(salary) from salaries; -- 63810.7448
+-- filter by > average salary using scalar subquery
+select *
+from salaries
+where to_date > curdate()
+and salary > (select avg(salary) from salaries);
+-- 154,543 records returned (this answer is correct based on inspecting the output)
+
+-- filter by list of emp_nos for salaries that are greater than the average historical salary using a scalar subquery inside of another subquery
+select *
+from salaries
+where to_date > curdate()
+and emp_no IN (
+	select emp_no from salaries where salary > (select avg(salary) from salaries)
+);
+-- 154,726 records returned
+-- this method is inlcuding salaries that are under the desired threshold, not sure why
+
+
+
+
