@@ -34,17 +34,17 @@ RIGHT JOIN roles
 ON roles.id = users.role_id;
 -- 5 records returned since there were 2 reviewers
 
-#3. Use count and the appropriate join type to get a list of roles along with the number of users that has the role. Hint: You will also need to use group by in the query. - LOOK AT THIS AGAIN
+#3. Use count and the appropriate join type to get a list of roles along with the number of users that has the role. Hint: You will also need to use group by in the query. Since I am using count(*) it is counting a user when it is null
 SELECT roles.name, COUNT(*) as number_of_users
 FROM roles
-RIGHT JOIN users
+LEFT JOIN users
 ON roles.id = users.role_id
 GROUP BY roles.name;
 
-#3v2. Use count and the appropriate join type to get a list of roles along with the number of users that has the role. Hint: You will also need to use group by in the query.
-SELECT roles.name, COUNT(*) as number_of_users
+#3v2. Use count and the appropriate join type to get a list of roles along with the number of users that has the role. Hint: You will also need to use group by in the query. When I specify what column to count, it doesn't count the null
+SELECT roles.name, COUNT(users.name) as number_of_users
 FROM roles
-RIGHT JOIN users
+LEFT JOIN users
 ON users.role_id = roles.id
 GROUP BY roles.name;
 -- doesnt matter the order of the arguments in the ON statement
