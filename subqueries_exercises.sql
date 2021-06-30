@@ -91,4 +91,26 @@ and emp_no IN (
 
 
 
+#6. How many current salaries are within 1 standard deviation of the current highest salary? (Hint: you can use a built in function to calculate the standard deviation.) What percentage of all salaries is this?
+-- start with all salaries
+-- find standard deviation (current or current and historic?)
+select std(salary) from salaries where to_date > curdate(); # standard deviation of current salaries = 17309.95933634675
+select std(salary) from salaries; # standard deviation of current and historic salaries = 16904.82828800014
+-- find current max salary
+select max(salary) from salaries where to_date > curdate(); # = 158,220
+-- find number of salaries that are within 1 standard deviation of the max (current or current and historic standard deviation)
+select salary from salaries where to_date > curdate() and salary >= ((select max(salary) from salaries where to_date > curdate()) - (select std(salary) from salaries where to_date > curdate())); # 83 salaries are within 1 standard deviation of current salaries (>=~140,910)
+select count(*) from salaries where to_date > curdate() and salary >= ((select max(salary) from salaries where to_date > curdate()) - (select std(salary) from salaries where to_date > curdate())); # used count aggregate function to get a total number as output
+select salary from salaries where to_date > curdate() and salary >= ((select max(salary) from salaries where to_date > curdate())-(select std(salary) from salaries)); # 78 salaries within 1 standard deviation of current and historical salaries (>=~141,315)
+select count(*) from salaries where to_date > curdate() and salary >= ((select max(salary) from salaries where to_date > curdate())-(select std(salary) from salaries)); # used count aggregate function to get a total number as output
+-- find total number of all salaries (current or historic)
+select salary from salaries where to_date > curdate(); # 240,124 total current salaries
+select count(*) from salaries where to_date > curdate(); # used count aggregate function to get a total number as output
+select salary from salaries; #2,844,047 current and historic salaries
+select count(*) from salaries; # used count aggregate function to get a total number as output
+-- divide and multipy by 100 to get percentage
+select ((select count(*) from salaries where to_date > curdate() and salary >= ((select max(salary) from salaries where to_date > curdate()) - (select std(salary) from salaries where to_date > curdate()))) / (select count(*) from salaries where to_date > curdate()))*100 as percentage_of_current_using_current_std; -- using denominator of all current salaries and std of all current salaries
+select ((select count(*) from salaries where to_date > curdate() and salary >= ((select max(salary) from salaries where to_date > curdate())-(select std(salary) from salaries)))/(select count(*) from salaries))*100 as percentage_of_current_and_historic_using_current_and_historic_std; -- using denominator of all current and historic salaries and std of all current and historic salaries
+-- percentage of current salaries that are within one stardard deviation of current max salary using std of only current salaries  = 0.0346%
+-- percentage of current and historic salaries within one standard deviation of current max salary using std of current and historic salaries = 0.0027%
 
