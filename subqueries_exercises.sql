@@ -26,16 +26,28 @@ from titles
 where emp_no IN (
 	select emp_no from dept_emp where to_date > curdate()
 );
+
 -- further filter by list of emp_nos from employees with first name desired - 251
 select title
 from titles
 where emp_no IN (
 	select emp_no from dept_emp where to_date > curdate()
 )
-and emp_no IN(
+and emp_no IN (
 	select emp_no from employees where first_name = "Aamod"
 );
 -- 251 records returned
+
+-- get list of unique titles
+select distinct title
+from titles
+where emp_no IN (
+	select emp_no from dept_emp where to_date > curdate()
+)
+and emp_no IN (
+	select emp_no from employees where first_name = "Aamod"
+);
+-- just six titles ever held removing duplications
 
 
 
@@ -48,7 +60,15 @@ from employees
 where emp_no IN (
 	select emp_no from dept_emp where to_date < curdate()
 );
--- 85,108 records returned
+-- 85,108 records returned (not correct) -- doesn't work since there are scenarios where multiple historical records that are being counted multiple times
+
+-- correct method
+select count(*)
+from employees
+where emp_no not in (
+	select emp_no from dept_emp where to_date > curdate()
+);
+-- 59,900 employees
 
 
 
