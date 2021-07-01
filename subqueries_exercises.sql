@@ -119,3 +119,38 @@ select ((select count(*) from salaries where to_date > curdate() and salary >= (
 
 -- percentage of current salaries that are within one stardard deviation of current max salary using std of only current salaries  = 0.0346%
 -- percentage of current and historic salaries within one standard deviation of current max salary using std of current and historic salaries = 0.0027%
+
+
+
+
+#B1. Find all the department names that currently have female managers.
+-- need employees table to get gender
+-- need dept_manager to get current department managers
+-- need departments to get names of departments
+# get emp_no for all current department managers
+select * from dept_manager where to_date > curdate();
+# check which of these managers are female by checking emp_no from employees
+select * from employees where gender = 'F' LIMIT 10;
+
+-- put pieces together to find all dept_no all departments with current female manager
+select dept_no from dept_manager
+where to_date > curdate()
+AND emp_no IN (
+	select emp_no from employees where gender = 'F'
+);
+
+-- add this as a subquery to pull department names for these dep_nos from departments table
+select dept_name from departments
+where dept_no IN (
+	select dept_no from dept_manager
+	where to_date > curdate()
+	AND emp_no IN (
+	select emp_no from employees where gender = 'F'
+				  )		
+);
+-- Answer: Development, Finance, Human Resources, Research
+
+
+
+
+#B2. 
