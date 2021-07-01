@@ -10,11 +10,11 @@ select emp_no, if (max(to_date) > now(), TRUE, FALSE) is_current_employee from d
 -- classmates code to decifer
 SELECT de.emp_no,
     MAX(dnum.dept_no) as "Department Number",
-    MIN(de.from_date) as "Start Date", MAX(de.to_date) as "End Date",
+    Min(de.from_date) as "Start Date", MAX(de.to_date) as "End Date",
     IF (MAX(de.to_date) > NOW(), TRUE, FALSE) is_current_employee
 FROM dept_emp as de
-LEFT JOIN (SELECT dept_no, emp_no FROM dept_emp
-WHERE to_date = (SELECT MAX(to_date) FROM dept_emp)) dnum using (emp_no)
+LEFT JOin (SELECT dept_no, emp_no FROM dept_emp
+WHERE to_date = (SELECT MAX(to_date) FROM dept_emp)) as dnum using (emp_no)
 GROUP BY emp_no;
 
 #2. Write a query that returns all employee names (previous and current), and a new column 'alpha_group' that returns 'A-H', 'I-Q', or 'R-Z' depending on the first letter of their last name.
@@ -54,5 +54,54 @@ group by decade_born;
 select concat(substring(birth_date,3,1), "0's") as decade, count(*) as count
 from employees
 group by decade;
+
+
+
+
+# B1. What is the current average salary for each of the following department groups: R&D, Sales & Marketing, Prod & QM, Finance & HR, Customer Service?
+
+-- break down into steps
+-- step one - get all current salaries
+select *
+from salaries as s
+where s.to_date > curdate();
+limit 30;
+-- step 2 - get all data needed together via joins - need salary info from salaries, need department number from dept_emp, need department name from departments
+select *
+from salaries as s
+join dept_emp using(emp_no)
+join departments using(dept_no)
+where s.to_date > curdate()
+limit 30;
+-- step 3 - split up into groups in new column using case statement
+select *,
+	case
+	  when dept_name in ('Customer Service') then 'Customer Service'
+       when dept_name in ('Finance', 'Human Resources') then 'Finance & HR'
+       when dept_name in ('Sales', 'Marketing') then 'Sales & Marketing'
+       when dept_name in ('Production', 'Quality Management') then 'Prod & QM'
+       when dept_name in ('Research', 'Development') then 'R&D'
+       else "Other"
+       end as dept_group
+from salaries as s
+join dept_emp using(emp_no)
+join departments using(dept_no)
+where s.to_date > curdate();
+-- step 4 - add group by to get average salaries for each department group (same logic as using count just different aggregate function)
+select
+	case
+	  when dept_name in ('Customer Service') then 'Customer Service'
+      when dept_name in ('Finance', 'Human Resources') then 'Finance & HR'
+      when dept_name in ('Sales', 'Marketing') then 'Sales & Marketing'
+      when dept_name in ('Production', 'Quality Management') then 'Prod & QM'
+      when dept_name in ('Research', 'Development') then 'R&D'
+       else "Other"
+       end as dept_group,
+       avg(salary) as avg_salary
+from salaries as s
+join dept_emp using(emp_no)
+join departments using(dept_no)
+where s.to_date > curdate()
+group by dept_group;
 		
 		
