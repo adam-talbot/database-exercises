@@ -7,13 +7,34 @@ select emp_no, dept_no, from_date, to_date, to_date > curdate() as is_current_em
 select emp_no, dept_no, from_date, to_date, to_date > curdate() as is_current_employee from dept_emp; -- all employees, multiple records for employees that changed departments
 select emp_no, if (max(to_date) > now(), TRUE, FALSE) is_current_employee from dept_emp group by emp_no; -- only gets max to date, but doesn't show all necessary columns
 
+-- step 1 - get latest department for all current and former employees from dept_emp table
+select emp_no, max(to_date) as end_date
+from dept_emp as de
+group by emp_no;
+-- step 2 - join these columns to dept_emp using inner join to get dept_no and only bringing over records where to_date is from latest department
+select *
+from dept_emp as de
+join (select emp_no, max(to_date) as end_date from dept_emp group by emp_no) as latest_dept on latest_dept.emp_no = de.emp_no and de.to_date = latest_dept.end_date;
+-- join employees table to get start date
+select *
+from dept_emp as de
+join (select emp_no, max(to_date) as end_date from dept_emp group by emp_no) as latest_dept on latest_dept.emp_no = de.emp_no and de.to_date = latest_dept.end_date
+join employees as e on e.emp_no = de.emp_no;
+-- select columns that I want
+select e.emp_no, dept_no, hire_date as start_date, end_date, end_date > curdate() as is_current_employee
+from dept_emp as de
+join (select emp_no, max(to_date) as end_date from dept_emp group by emp_no) as latest_dept on latest_dept.emp_no = de.emp_no and de.to_date = latest_dept.end_date
+join employees as e on e.emp_no = de.emp_no;
+
+
+
 -- classmates code to decifer
 SELECT de.emp_no,
     MAX(dnum.dept_no) as "Department Number",
     Min(de.from_date) as "Start Date", MAX(de.to_date) as "End Date",
     IF (MAX(de.to_date) > NOW(), TRUE, FALSE) is_current_employee
 FROM dept_emp as de
-LEFT JOin (SELECT dept_no, emp_no FROM dept_emp
+LEFT join (SELECT dept_no, emp_no FROM dept_emp
 WHERE to_date = (SELECT MAX(to_date) FROM dept_emp)) as dnum using (emp_no)
 GROUP BY emp_no;
 
@@ -86,7 +107,8 @@ select *,
 from salaries as s
 join dept_emp using(emp_no)
 join departments using(dept_no)
-where s.to_date > curdate();
+where s.to_date > curdate()
+limit 30;
 -- step 4 - add group by to get average salaries for each department group (same logic as using count just different aggregate function)
 select
 	case
@@ -102,6 +124,7 @@ from salaries as s
 join dept_emp using(emp_no)
 join departments using(dept_no)
 where s.to_date > curdate()
-group by dept_group;
-		
+group by dept_group
+order by avg_salary desc;
+
 		
