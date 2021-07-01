@@ -169,4 +169,16 @@ where emp_no = (
 
 
 
-#B3. 
+#B3. Find the department name that the employee with the highest salary works in.
+-- need departments table to get department name
+-- need salaries table to get max salary
+-- need dept_emp to tie employee to department
+#get max salary
+select max(salary) from salaries where to_date > curdate();
+# use this scalar subquery to get rest of info about employee from salaries table
+select emp_no from salaries where salary = (select max(salary) from salaries where to_date > curdate());
+# use this query to get dept_no from dept_emp using emp_no
+select dept_no from dept_emp where emp_no = (select emp_no from salaries where salary = (select max(salary) from salaries where to_date > curdate()));
+# use departments table to get dept_name using this dept_no
+select dept_name from departments where dept_no = (select dept_no from dept_emp where emp_no = (select emp_no from salaries where salary = (select max(salary) from salaries where to_date > curdate())));
+-- Sales
