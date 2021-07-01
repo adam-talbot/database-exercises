@@ -153,4 +153,20 @@ where dept_no IN (
 
 
 
-#B2. 
+#B2. Find the first and last name of the employee with the highest salary.
+-- need employees table to get name
+-- need salaries table to get max salary
+select max(salary) from salaries where to_date > curdate();
+-- write a query from salaries using this query as a sub query to return the employee number for the employee with the max salary
+select emp_no from salaries where salary = (select max(salary) from salaries where to_date > curdate());
+-- add this as a subquery from employees table to return first and last name of employee with highest current salary
+select first_name, last_name from employees
+where emp_no = (
+	select emp_no from salaries where salary = (select max(salary) from salaries where to_date > curdate())
+);
+-- Tokuyasu Pesch
+
+
+
+
+#B3. 
