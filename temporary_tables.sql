@@ -129,7 +129,7 @@ FROM salaries AS s
 JOIN dept_emp AS de ON de.emp_no = s.emp_no AND de.to_date > curdate() -- make sure I am only joining from dept_emp for current employees to prevent adding duplications with incorrect salary numbers - 240,124
 JOIN departments AS d USING(dept_no)
 WHERE s.to_date > curdate();
--- use group by and agregagte function to get average salary for each department
+-- use group by and aggregate function to get average salary for each department
 SELECT dept_name, AVG(salary) AS average_salary
 FROM salaries AS s
 JOIN dept_emp AS de ON de.emp_no = s.emp_no AND de.to_date > curdate() -- make sure I am only joining from dept_emp for current employees to prevent adding duplications with incorrect salary numbers - 240,124
@@ -141,4 +141,44 @@ ORDER BY average_salary DESC;
 -- step 2 - find overall, historic average pay (this will be a scalar)
 -- will need salary table only to just grab average pay of all salaries ever paid
 SELECT AVG(salary) FROM salaries; -- 63,810.7448
+
+-- step 3 - find z score
+-- z score = (average salary of department - historical average) / standard deviation
+-- should we use standard deviation of current salaries or historical salaries (current and historic)?
+-- since we are mixing current dataw (for department averages) and historical data (for overall average) it is not clear which would make more sense, so I will use both and compare results
+-- find standard deviation of historical salaries 
+SELECT std(salary) FROM salaries;
+-- find standard deviation of current salaries
+SELECT std(salary) FROM salaries WHERE to_date > curdate();
+
+-- step 4 - create a table with departments and zscores
+-- use historical std first
+-- use group by and aggregate function to get average salary for each department
+SELECT dept_name, (((AVG(salary))-(SELECT AVG(salary) FROM salaries))/(SELECT std(salary) FROM salaries)) AS z_score
+FROM salaries AS s
+JOIN dept_emp AS de ON de.emp_no = s.emp_no AND de.to_date > curdate() -- make sure I am only joining from dept_emp for current employees to prevent adding duplications with incorrect salary numbers - 240,124
+JOIN departments AS d USING(dept_no)
+WHERE s.to_date > curdate()
+GROUP BY dept_name
+ORDER BY z_score DESC;
+-- this looks weird since there are no negative values, meaning all averages are above the mean, likely due to using historical average (inflation?)
+
+-- do same thing using current std
+SELECT dept_name, (((AVG(salary))-(SELECT AVG(salary) FROM salaries))/(SELECT std(salary) FROM salaries WHERE to_date > curdate())) AS z_score
+FROM salaries AS s
+JOIN dept_emp AS de ON de.emp_no = s.emp_no AND de.to_date > curdate() -- make sure I am only joining from dept_emp for current employees to prevent adding duplications with incorrect salary numbers - 240,124
+JOIN departments AS d USING(dept_no)
+WHERE s.to_date > curdate()
+GROUP BY dept_name
+ORDER BY z_score DESC;
+
+-- do one more using current average salary and current std
+SELECT dept_name, (((AVG(salary))-(SELECT AVG(salary) FROM salaries WHERE to_date > curdate()))/(SELECT std(salary) FROM salaries WHERE to_date > curdate())) AS z_score
+FROM salaries AS s
+JOIN dept_emp AS de ON de.emp_no = s.emp_no AND de.to_date > curdate() -- make sure I am only joining from dept_emp for current employees to prevent adding duplications with incorrect salary numbers - 240,124
+JOIN departments AS d USING(dept_no)
+WHERE s.to_date > curdate()
+GROUP BY dept_name
+ORDER BY z_score DESC;
+-- this shows variation based on current salaries, therefore there are negative z scores
 
