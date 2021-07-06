@@ -72,71 +72,88 @@ SELECT * FROM employees_with_departments;
 UPDATE employees_with_departments SET email = CONCAT(first_name, '@company.com');
 SELECT * FROM employees_with_departments;
 
+
+
+
+
 ####### EXERCISES #######
 
-USE employees;
+
+
+
+USE employees; -- use this table since it will make it easier in terms of typing
+DROP TABLE germain_1478.employees_with_departments; -- drop this table so that I can recreate for exercises
+SELECT * FROM germain_1478.employees_with_departments; -- verify that it has indeed been dropped
 
 #1. Using the example from the lesson, create a temporary table called employees_with_departments that contains first_name, last_name, and dept_name for employees currently with that department.
-CREATE TEMPORARY TABLE employees_with_departments AS
+CREATE TEMPORARY TABLE germain_1478.employees_with_departments AS
 SELECT first_name, last_name, dept_name
 FROM employees
 JOIN dept_emp USING(emp_no)
 JOIN departments USING(dept_no)
 WHERE to_date > curdate();
 
--- this is a test since I don't have access quite yet
-SELECT first_name, last_name, dept_name
-FROM employees
-JOIN dept_emp USING(emp_no)
-JOIN departments USING(dept_no)
-WHERE to_date > curdate()
-LIMIT 100;
+SELECT * FROM germain_1478.employees_with_departments LIMIT 100; -- take a look at newly created temp table
 
 #a. Add a column named full_name to this table. It should be a VARCHAR whose length is the sum of the lengths of the first name and last name columns
-ALTER TABLE employees_with_departments ADD full_name VARCHAR(length(first_name) + length(last_name) + 1); -- extra character added for space
-
--- test dince I dont have access yet
-SELECT (length(first_name) + length(last_name) + 1) FROM employees;
+ALTER TABLE germain_1478.employees_with_departments ADD full_name VARCHAR(30); -- 30 is sum of lengths first_name and last_name (14+16)
+SELECT * FROM germain_1478.employees_with_departments LIMIT 100;
+DESCRIBE germain_1478.employees_with_departments;
 
 #b. Update the table so that full name column contains the correct data
-UPDATE employees_with_departments SET full_name = CONCAT(first_name, ' ', last_name); -- may need to add a space when creating new column to make sure these concats fit
-
--- test
-SELECT concat(first_name, ' ', last_name) FROM employees;
+UPDATE germain_1478.employees_with_departments SET full_name = CONCAT(first_name, ' ', last_name); 
+SELECT * FROM germain_1478.employees_with_departments LIMIT 100;
 
 #c. Remove the first_name and last_name columns from the table.
-ALTER TABLE employees_with_departments DROP COLUMN first_name, last_name;
+ALTER TABLE germain_1478.employees_with_departments DROP COLUMN first_name, DROP COLUMN last_name;
+SELECT * FROM germain_1478.employees_with_departments LIMIT 100;
 
 #d. What is another way you could have ended up with this same table?
 -- just create it with a single query
-SELECT dept_name, concat(first_name, ' ', last_name AS full_name
+SELECT dept_name, concat(first_name, ' ', last_name) AS full_name
 FROM employees
 JOIN dept_emp USING(emp_no)
 JOIN departments USING(dept_no)
 WHERE to_date > curdate()
 LIMIT 100;
+
+
 
 
 #2. Create a temporary table based on the payment table from the sakila database.
 -- WRITE the SQL necessary TO transform the amount COLUMN such that it IS stored AS an INTEGER representing the number of cents of the payment. FOR example, 1.99 should become 199.
-SELECT * FROM payment;
+USE sakila;
+SELECT * FROM payment
+LIMIT 100;
 
-CREATE TEMPORARY TABLE payment_amount_integer AS
-SELECT payment_id, amount, cast((amount * 100) AS UNSIGNED) AS amount_integer -- CAST data types are different than column data types, must indicate whether INT is SIGNED or UNSIGNED for it to work
+CREATE TEMPORARY TABLE germain_1478.payment_amount_integer AS
+SELECT payment_id, amount, cast((amount * 100) AS UNSIGNED) AS amount_integer -- CAST data types are different than column data types
 FROM payment;
 
--- test
-SELECT payment_id, amount, cast((amount * 100) AS UNSIGNED) AS amount_integer
-FROM payment;
+SELECT * FROM germain_1478.payment_amount_integer;
 
 -- could also accomplish this by creating the table and then adding the transformed column
-CREATE TEMPORARY TABLE payment_amount_integer AS
+DROP TABLE germain_1478.payment_amount_integer; -- drop so I can recreate
+
+CREATE TEMPORARY TABLE germain_1478.payment_amount_integer AS
 SELECT payment_id, amount
 FROM payment;
+
+SELECT * FROM germain_1478.payment_amount_integer; -- see whats going on
+DESCRIBE germain_1478.payment_amount_integer;
+
 -- add column
-ALTER TABLE payment_amount_integer ADD amount_integer UNSIGNED;
+ALTER TABLE germain_1478.payment_amount_integer ADD amount_integer INT UNSIGNED;
+SELECT * FROM germain_1478.payment_amount_integer;
+DESCRIBE germain_1478.payment_amount_integer;
+
 -- poplulate the newly added column
-UPDATE payment_amount_integer SET amount_integer = amount * 100;
+UPDATE germain_1478.payment_amount_integer SET amount_integer = amount * 100;
+SELECT * FROM germain_1478.payment_amount_integer;
+
+
+
+
 
 #3. Find out how the current average pay in each department compares to the overall, historical average pay. In order to make the comparison easier, you should use the Z-score for salaries. In terms of salary, what is the best department right now to work for? The worst?
 
