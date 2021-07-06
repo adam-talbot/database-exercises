@@ -157,6 +157,8 @@ SELECT * FROM germain_1478.payment_amount_integer;
 
 #3. Find out how the current average pay in each department compares to the overall, historical average pay. In order to make the comparison easier, you should use the Z-score for salaries. In terms of salary, what is the best department right now to work for? The worst?
 
+USE employees;
+
 -- step 1 - find current average pay for each department
 -- will need salaries, will need dept_emp to connect salaries to dept via emp_no, will need departments to get dept_name via dept_no from dept_emp
 SELECT * FROM salaries WHERE to_date > curdate(); -- all curent salaries - 240,124
@@ -187,7 +189,7 @@ SELECT AVG(salary) FROM salaries; -- 63,810.7448
 -- step 3 - find z score
 -- z score = (average salary of department - historical average) / standard deviation
 -- should we use standard deviation of current salaries or historical salaries (current and historic)?
--- since we are mixing current dataw (for department averages) and historical data (for overall average) it is not clear which would make more sense, so I will use both and compare results
+-- since we are mixing current data (for department averages) and historical data (for overall average) it is not clear which would make more sense, so I will use both and compare results
 -- find standard deviation of historical salaries 
 SELECT std(salary) FROM salaries;
 -- find standard deviation of current salaries
@@ -224,3 +226,79 @@ GROUP BY dept_name
 ORDER BY z_score DESC;
 -- this shows variation based on current salaries, therefore there are negative z scores
 
+# best dept to work for in terms of salary, Sales. Worst, HR.
+
+
+-- recreate this using a temp table to solve
+USE employees;
+
+CREATE TEMPORARY TABLE germain_1478.zscore_salaries AS
+SELECT dept_name, AVG(salary) AS average_salary
+FROM salaries AS s
+JOIN dept_emp AS de ON de.emp_no = s.emp_no AND de.to_date > curdate() -- make sure I am only joining from dept_emp for current employees to prevent adding duplications with incorrect salary numbers - 240,124
+JOIN departments AS d USING(dept_no)
+WHERE s.to_date > curdate()
+GROUP BY dept_name
+ORDER BY average_salary DESC;
+
+SELECT * FROM germain_1478.zscore_salaries;
+DESCRIBE germain_1478.zscore_salaries;
+
+-- add column for average historcal salary
+ALTER TABLE germain_1478.zscore_salaries ADD historical_ave_salary DECIMAL(14,4); -- data type to match type added by mySQL when average function was run
+SELECT * FROM germain_1478.zscore_salaries;
+DESCRIBE germain_1478.zscore_salaries;
+
+-- populate newly added column
+UPDATE germain_1478.zscore_salaries SET historical_ave_salary = (SELECT AVG(salary) FROM salaries);
+SELECT * FROM germain_1478.zscore_salaries;
+DESCRIBE germain_1478.zscore_salaries;
+
+-- add a column for std of current salaries
+ALTER TABLE germain_1478.zscore_salaries ADD current_std DECIMAL(14,4); -- data type to match type added by mySQL when average function was run
+SELECT * FROM germain_1478.zscore_salaries;
+DESCRIBE germain_1478.zscore_salaries;
+
+-- populate newly added column
+UPDATE germain_1478.zscore_salaries SET current_std = (SELECT std(salary) FROM salaries WHERE to_date > curdate());
+SELECT * FROM germain_1478.zscore_salaries;
+DESCRIBE germain_1478.zscore_salaries;
+
+-- add a column for st of historical salaries
+ALTER TABLE germain_1478.zscore_salaries ADD historical_std DECIMAL(14,4); -- data type to match type added by mySQL when average function was run
+SELECT * FROM germain_1478.zscore_salaries;
+DESCRIBE germain_1478.zscore_salaries;
+
+-- populate newly added column
+UPDATE germain_1478.zscore_salaries SET historical_std = (SELECT std(salary) FROM salaries);
+SELECT * FROM germain_1478.zscore_salaries;
+DESCRIBE germain_1478.zscore_salaries;
+
+-- calculate z score from temp table using columns and referencing them directly instead of having to put whole queries in function
+-- using current std
+SELECT dept_name, (average_salary - historical_ave_salary)/(current_std) AS zscore_current_std
+FROM germain_1478.zscore_salaries
+ORDER BY zscore_current_std DESC;
+
+-- using historical std
+SELECT dept_name, (average_salary - historical_ave_salary)/(historical_std) AS zscore_current_std
+FROM germain_1478.zscore_salaries
+ORDER BY zscore_current_std DESC;
+
+-- just for fun - use current average salary to see how that looks
+-- add column
+ALTER TABLE germain_1478.zscore_salaries ADD current_ave_salary DECIMAL(14,4); -- data type to match type added by mySQL when average function was run
+SELECT * FROM germain_1478.zscore_salaries;
+DESCRIBE germain_1478.zscore_salaries;
+
+-- populate newly added column
+UPDATE germain_1478.zscore_salaries SET current_ave_salary = (SELECT AVG(salary) FROM salaries WHERE to_date > curdate());
+SELECT * FROM germain_1478.zscore_salaries;
+DESCRIBE germain_1478.zscore_salaries;
+
+SELECT dept_name, (average_salary - current_ave_salary)/(current_std) AS zscore_current_std_current_ave_salary
+FROM germain_1478.zscore_salaries
+ORDER BY zscore_current_std_current_ave_salary DESC;
+-- I am seeing what I expected to see, negative z scores are present
+
+# best department to work in in terms of salary remains Sales. Worst remains HR.
