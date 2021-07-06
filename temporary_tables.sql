@@ -110,6 +110,11 @@ SELECT * FROM germain_1478.employees_with_departments LIMIT 100;
 
 #d. What is another way you could have ended up with this same table?
 -- just create it with a single query
+
+DROP TABLE germain_1478.employees_with_departments; -- drop this table so that I can recreate
+SELECT * FROM germain_1478.employees_with_departments; -- verify that it has indeed been dropped
+
+CREATE TEMPORARY TABLE germain_1478.employees_with_departments AS
 SELECT dept_name, concat(first_name, ' ', last_name) AS full_name
 FROM employees
 JOIN dept_emp USING(emp_no)
@@ -117,7 +122,7 @@ JOIN departments USING(dept_no)
 WHERE to_date > curdate()
 LIMIT 100;
 
-
+SELECT * FROM germain_1478.employees_with_departments LIMIT 100;
 
 
 #2. Create a temporary table based on the payment table from the sakila database.
