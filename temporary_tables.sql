@@ -1,5 +1,6 @@
 ####################### TEMPORARY TABLES LESSON FROM CURRICULUM #######################
 
+USE germain_1478; -- must use your personal database on the server to have write access and then access other tables using database.table syntax
 
 ## TABLE CREATION EXAMPLE ##
 
@@ -8,44 +9,68 @@ CREATE TEMPORARY TABLE my_numbers(
     n INT UNSIGNED NOT NULL 
 );
 
+DESCRIBE my_numbers;
+
 # Insert some data into newly created temp table
 INSERT INTO my_numbers(n) VALUES (1), (2), (3), (4), (5);
 
 # Take a look at temp table
 SELECT * FROM my_numbers;
 
-# Perform an update to change values in temp table
+DROP TABLE my_numbers; -- nukes table, be careful with this one
+
+# Perform an update to change values in temp table - if you do n = 10, all rows will be set to 10, can also use logic to only update certain rows (set n = 2 where n > 1 for example)
 UPDATE my_numbers SET n = n + 1;
 
 # Take a look at temp table
 SELECT * FROM my_numbers;
 
-# Now let's remove some records
+# Now let's remove some records - start with a select statement to see which rows you will be deleting, the change SELECT to DELETE (don't need colums after delete statement)
 DELETE FROM my_numbers WHERE n % 2 = 0;
+-- If there is no WHERE clause after the DELETE, it will delete all rows, be careful here if you have write access
 
 # Take a look at temp table
 SELECT * FROM my_numbers;
 
 
 ## CREATING A TABLE FROM QUERY RESULTS ##
-
-USE employees;
+USE germain_1478;
+SELECT DATABASE();
 
 CREATE TEMPORARY TABLE employees_with_departments AS
+SELECT emp_no, first_name, last_name, dept_no, dept_name
+FROM employees.employees
+JOIN employees.dept_emp USING(emp_no)
+JOIN employees.departments USING(dept_no)
+LIMIT 100;
+
+SELECT * FROM employees_with_departments; -- worked using approach of being in my database and referencing other database and table directly using db.table syntax
+
+DROP TABLE employees_with_departments;
+
+-- another approach - use db you need and then refer to your personal db when creating the temp table
+USE employees;
+
+CREATE TEMPORARY TABLE germain_1478.employees_with_departments AS
 SELECT emp_no, first_name, last_name, dept_no, dept_name
 FROM employees
 JOIN dept_emp USING(emp_no)
 JOIN departments USING(dept_no)
 LIMIT 100;
--- it appears that I don't have necessary access to create temp tables from the employees database
--- "Access denied for user 'germain_1478'@'%' to database 'employees'"
+
+SELECT * FROM germain_1478.employees_with_departments; -- this approach also worked
+
+USE germain_1478;
+SELECT DATABASE();
+SELECT * FROM employees_with_departments;
 
 ALTER TABLE employees_with_departments DROP COLUMN dept_no;
+SELECT * FROM employees_with_departments;
 ALTER TABLE employees_with_departments ADD email VARCHAR(100);
+SELECT * FROM employees_with_departments;
 -- a simple example where we want the email address to be just the first name
-UPDATE employees_with_departments
-SET email = CONCAT(first_name, '@company.com');
-
+UPDATE employees_with_departments SET email = CONCAT(first_name, '@company.com');
+SELECT * FROM employees_with_departments;
 
 ####### EXERCISES #######
 
