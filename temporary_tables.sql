@@ -96,7 +96,7 @@ WHERE to_date > curdate();
 SELECT * FROM germain_1478.employees_with_departments LIMIT 100; -- take a look at newly created temp table
 
 #a. Add a column named full_name to this table. It should be a VARCHAR whose length is the sum of the lengths of the first name and last name columns
-ALTER TABLE germain_1478.employees_with_departments ADD full_name VARCHAR(30); -- 30 is sum of lengths first_name and last_name (14+16)
+ALTER TABLE germain_1478.employees_with_departments ADD full_name VARCHAR(31); -- 30 is sum of lengths first_name and last_name (14+16) and a space is needed
 SELECT * FROM germain_1478.employees_with_departments LIMIT 100;
 DESCRIBE germain_1478.employees_with_departments;
 
