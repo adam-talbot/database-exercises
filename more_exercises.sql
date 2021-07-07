@@ -63,4 +63,6 @@ JOIN germain_1478.dept_manager_sal USING(dept_name);
 
 
 
+#2. work on question 2 here
 
+#3. work on question 3 here
