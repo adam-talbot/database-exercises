@@ -59,10 +59,54 @@ JOIN germain_1478.dept_manager_sal USING(dept_name);
 # yes, there are 2 departments where the manager makes less than the average salary for that department: Customer Service and Production
 
 
+### WORLD DATABASE ###
+
+
+#1. What languages are spoken in Santa Monica? (this actually shows breakdown of languages spoken across entire US, but matches desired results)
+
+USE world;
+
+SELECT LANGUAGE, percentage FROM countrylanguage WHERE CountryCode IN (SELECT CountryCode FROM city WHERE name = 'Santa Monica') ORDER BY percentage;
+
+#2. How many different countries are in each region?
+
+select region, count(region) as num_countries from country group by region order by num_countries;
+
+#3. What is the population for each region?
+
+select region, sum(population) as population from country group by region order by population desc;
+
+#4. What is the population for each continent?
+
+select Continent, sum(population) as population from country group by Continent order by population desc; 
+
+#5. What is the average life expectancy globally?
+
+select avg(LifeExpectancy) from country;
+
+#6. What is the average life expectancy for each region, each continent? Sort the results from shortest to longest
+
+select region, avg(LifeExpectancy) as life_expectancy from country group by region order by life_expectancy; -- for region
+
+select Continent, avg(LifeExpectancy) as life_expectancy from country group by Continent order by life_expectancy; -- for continent
+
+## BONUS ##
+
+#1. Find all the countries whose local name is different from the official name
+
+SELECT name, LocalName from country where name <> LocalName; -- 135 records returned
+
+#2. How many countries have a life expectancy less than x? I will use 50
+select name, LifeExpectancy from country where LifeExpectancy < 50; -- 28 records returned
+
+#3. What state is city x located in? I will use Santa Monica
+select name, district from city where name = 'Santa Monica'; -- Cali
+
+#4. What region of the world is city x located in? I will use Bahamas
+select name, region from country where name = 'Bahamas'; -- Caribbean
 
 
 
 
-#2. work on question 2 here
 
-#3. work on question 3 here
+
